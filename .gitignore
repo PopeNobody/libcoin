@@ -7,3 +7,5 @@ main
 *.i
 *.o
 
+include
+lib
