@@ -9,8 +9,14 @@ namespace coin {
   {
     struct data_t {
       std::array<char,12> text;
+      size_t length;
     } data;
+    static const data_t &empty_data() {
+      static const data_t res = { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0 };
+      return res;
+    };
     word_t(const char *text)
+      : data(empty_data)
     {
       auto orig=text;
       for(int i=0;i<sizeof(data.text);i++)
