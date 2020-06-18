@@ -1,0 +1,12 @@
+main
+*.o
+*.out
+
+*.a
+*.d
+*.i
+*.o
+
+include
+lib
+**.log
