@@ -9,3 +9,4 @@ main
 
 include
 lib
+**.log
