@@ -1,12 +1,17 @@
+try: all
+	./main
+
 all: main
 
-MAKEFLAGS := -rR --warn-undefined-variables
+MAKEFLAGS := -rR --warn-undefined-variables -j8
 
 CXX:=g++
 CC:=$(CXX)
 LD:=$(CXX)
 LDLIBS:=-lcoin -liberty
-CXXFLAGS := -ggdb3 -O0 -std=c++0x
+CPPFLAGS := -Iinclude -MD
+CXXFLAGS := -ggdb3 -O0 -std=c++17
+LDFLAGS := -ggdb3 -O0 -std=c++17 -Llib -L.
 
 exe_src := main.cc
 all_src := $(wildcard *.cc)
@@ -22,13 +27,13 @@ all_cpp := $(exe_cpp) $(lib_cpp)
 
 
 $(all_obj): %.cc.o: %.cc $(wildcard *.hh)
-	$(CXX) $(CXXFLAGS) -o $@ -c $<
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ -c $<
 
 $(all_cpp): %.cc.i: %.cc $(wildcard *.hh)
-	$(CXX) $(CXXFLAGS) -o $@ -E $<
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ -E $<
 
 libcoin.a: $(lib_obj)
 	ar r $@ $^
 
 main: main.cc.o libcoin.a
-
+	$(CXX) $(LDFLAGS) -o $@ $< $(LDLIBS)
