@@ -7,13 +7,13 @@ all: main
 
 MAKEFLAGS := -rR --warn-undefined-variables -j8
 
-CXX?=g++
-CC?=$(CXX)
+CXX:=$(word 1, $(CXX) clang++ g++)
+CC:=$(CXX)
 LD:=$(CXX)
 LDLIBS:=-lcoin -liberty
-CPPFLAGS := -Iinclude -MD
+CPPFLAGS := -Iinclude -I../include -MD
 CXXFLAGS := -ggdb3 -O0 -std=c++17
-LDFLAGS := -ggdb3 -O0 -std=c++17 -Llib -L.
+LDFLAGS := -ggdb3 -O0 -std=c++17 -L. -Llib -L../lib
 
 exe_src := main.cc
 all_src := $(wildcard *.cc)
