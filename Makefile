@@ -15,7 +15,11 @@ CPPFLAGS := -Iinclude -I../include -MD
 CXXFLAGS := -ggdb3 -O0 -std=c++17
 LDFLAGS  := -L. -Llib -L../lib
 
-exe_src := main.cc
+all_exe := main some_test
+dis_exe := some_test
+exe_exe := $(filter-out $(dis_exe), $(all_exe))
+
+exe_src := $(patsubst %.cc, %, $(all_exe))
 all_src := $(wildcard *.cc)
 lib_src := $(filter-out $(exe_src),$(all_src))
 
@@ -37,10 +41,10 @@ $(all_cpp): %.cc.i: %.cc
 libcoin.a: $(lib_obj)
 	ar r $@ $^
 
-main: main.cc.o libcoin.a
-	$(CXX) $(LDFLAGS) -o $@ $< $(LDLIBS)
+$(exe_exe): %: %.cc.o libcoin.a etc/ldflags
+	$(CXX) @etc/ldflags $(LDFLAGS) -o $@ $< $(LDLIBS)
 
 clean:
-	$(RM_F) $(wildcard *.[ioda])
+	$(RM_F) $(wildcard *.[ioda]) 
 
 include /dev/null $(wildcard *.d)
