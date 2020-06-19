@@ -9,11 +9,11 @@ MAKEFLAGS := -rR --warn-undefined-variables -j8
 
 CXX:=$(word 1, $(CXX) clang++ g++)
 CC:=$(CXX)
-LD:=$(CXX)
+RM_F:=rm -f
 LDLIBS:=-lcoin -liberty
 CPPFLAGS := -Iinclude -I../include -MD
 CXXFLAGS := -ggdb3 -O0 -std=c++17
-LDFLAGS := -ggdb3 -O0 -std=c++17 -L. -Llib -L../lib
+LDFLAGS  := -L. -Llib -L../lib
 
 exe_src := main.cc
 all_src := $(wildcard *.cc)
@@ -28,10 +28,10 @@ lib_cpp := $(patsubst %.cc, %.cc.i, $(lib_src))
 all_cpp := $(exe_cpp) $(lib_cpp)
 
 
-$(all_obj): %.cc.o: %.cc $(wildcard *.hh)
+$(all_obj): %.cc.o: %.cc.i
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ -c $<
 
-$(all_cpp): %.cc.i: %.cc $(wildcard *.hh)
+$(all_cpp): %.cc.i: %.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ -E $<
 
 libcoin.a: $(lib_obj)
@@ -39,3 +39,8 @@ libcoin.a: $(lib_obj)
 
 main: main.cc.o libcoin.a
 	$(CXX) $(LDFLAGS) -o $@ $< $(LDLIBS)
+
+clean:
+	$(RM_F) $(wildcard *.[ioda])
+
+include /dev/null $(wildcard *.d)
