@@ -1,3 +1,5 @@
+include etc/config.mk
+
 try: all
 	./main
 
@@ -5,8 +7,8 @@ all: main
 
 MAKEFLAGS := -rR --warn-undefined-variables -j8
 
-CXX:=g++
-CC:=$(CXX)
+CXX?=g++
+CC?=$(CXX)
 LD:=$(CXX)
 LDLIBS:=-lcoin -liberty
 CPPFLAGS := -Iinclude -MD
