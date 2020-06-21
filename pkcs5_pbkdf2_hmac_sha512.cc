@@ -69,7 +69,7 @@ coin::long_digest coin::pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
     long_digest hash;
     memset(&hash,0,sizeof(hash));
     const auto result = pkcs5_pbkdf2(passphrase.data(), passphrase.size(),
-        salt.data(), salt.size(), hash.data(), hash.size(), iterations);
+        salt.data(), salt.size(), hash.begin(), hash.size(), iterations);
 
     if (result != 0)
         throw std::bad_alloc();

@@ -1,11 +1,8 @@
 #ifndef LIBBITCOIN_SYSTEM_HASH_HPP
 #define LIBBITCOIN_SYSTEM_HASH_HPP
 
-#include <cstddef>
-#include <string>
-#include <vector>
-#include <array>
-#include <boost/multiprecision/cpp_int.hpp>
+#include "stl.hh"
+#include "array_slice.hh"
 
 namespace coin {
   typedef uint8_t byte_t;
@@ -23,12 +20,65 @@ template<size_t size>
   class byte_array : public std::array<byte_t, size>
 {
 };
+
 // Common bitcoin hash containers.
 typedef byte_array<hash_size> hash_digest;
 typedef byte_array<half_hash_size> half_hash;
 typedef byte_array<quarter_hash_size> quarter_hash;
-typedef byte_array<long_hash_size> long_hash;
-typedef long_hash long_digest;
+typedef byte_array<hash_size> long_hash;
+typedef array_slice<byte_t> data_slice;
+typedef array_slice<char> text_slice;
+
+struct long_digest
+{
+  typedef byte_array<long_hash_size> data_t;
+  typedef pair<hash_digest,hash_digest> split_t;
+  union {
+    data_t data;
+    split_t split;
+  };
+  long_digest(const data_t &data = data_t())
+    : data(data)
+  {
+  };
+  long_digest &operator=(const long_digest &rhs)
+  {
+    data=rhs.data;
+    return *this;
+  };
+  operator const data_slice() const
+  {
+    return data_slice(data);
+  };
+  uint8_t *begin() {
+    return data.begin();
+  };
+  uint8_t *end() {
+    return data.end();
+  };
+  const uint8_t *begin() const {
+    return data.begin();
+  };
+  const uint8_t *end() const {
+    return data.end();
+  };
+  const size_t size() const {
+    return data.size();
+  };
+  const hash_digest &part1() const
+  {
+    return split.first;
+  };
+  const hash_digest &part2() const
+  {
+    return split.second;
+  };
+  const split_t &parts() const
+  {
+    return split;
+  };
+};
+ostream &operator<<(ostream &lhs, const long_digest &rhs);
 typedef byte_array<short_hash_size> short_hash;
 typedef byte_array<mini_hash_size> mini_hash;
 

@@ -136,10 +136,10 @@ namespace coin {
   }
 #endif
 
-  long_hash hmac_sha512_hash(const data_slice& data, const data_slice& key)
+  long_digest hmac_sha512_hash(const data_slice& data, const data_slice& key)
   {
-    long_hash hash;
-    HMACSHA512(data.data(), data.size(), key.data(), key.size(), hash.data());
+    long_digest hash;
+    HMACSHA512(data.data(), data.size(), key.data(), key.size(), hash.begin());
     return hash;
   }
 }

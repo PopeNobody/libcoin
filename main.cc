@@ -114,7 +114,7 @@ const coin::stext_t &coin::to_hex(unsigned ch)
   };
   return pairs[ch];
 };
-coin::word_list coin::split(const string &phrase)
+coin::word_list coin::split_words(const string &phrase)
 {
   word_list res;
   auto b(phrase.begin()), e(phrase.end());
@@ -201,7 +201,7 @@ coin::hd_private coin::hd_private::derive_private(int idx, bool hard)const
 //       :
 //       coin::splice(point(), to_big_endian(idx));
 
-  const auto parts = split(hmac_sha512_hash(data,chain()));
+  const auto parts = hmac_sha512_hash(data,chain()).parts();
   return *this;
 };
 coin::hd_key coin::hd_private::to_hd_key() const
@@ -292,29 +292,7 @@ coin::hd_root_t coin::hd_new(const coin::long_digest &seed)
   return data;
 };
 #endif
-coin::hd_root_t::hd_root_t()
-{
-}
-coin::hd_root_t coin::hd_root_t::from_mnemonic(const string &phrase)
-{
-  return from_mnemonic(split(phrase));
-}
-coin::hd_root_t coin::hd_root_t::from_mnemonic(const word_list &words)
-{
-  return from_seed(decode_mnemonic(words));
-}
-coin::hd_root_t coin::hd_root_t::from_seed(const long_digest &seed)
-{
-  const static auto magic = to_chunk("Bitcoin seed");
-  const uint32_t pfix=76066276;
-  hd_lineage_t lineage(prefix_t(0,pfix), 0, 0, 0);
-  auto full_hash=hmac_sha512_hash(seed,magic);
-  auto part_hash=split(full_hash);
-  hd_root_t res;
-  res.data.seed=seed;
-  res.data.root=hd_private(part_hash.first,part_hash.second,lineage);
-  return res;
-}
+#if 0
 namespace coin {
   template<size_t _size>
   struct bin_and_hex
@@ -355,6 +333,7 @@ namespace coin {
     return lhs;
   };
 };
+#endif
 int app_main(const vector<string> &args)
 {
   int num=0;
@@ -379,7 +358,7 @@ int app_main(const vector<string> &args)
   auto hd_key=m.root().to_hd_key();
   auto slice = array_slice(hd_key.data(),hd_key.data()+hd_key.size());
   auto purpose=m.root().derive_private(44,true);
-  cout << "private_root_key: " << encode_base58(hd_key) << endl;
+  cout << "root_key:         " << encode_base58(hd_key) << endl;
   cout << "m.root():         " << m.root() << endl;
   cout << "purpose:          " << purpose << endl;
   return 0;
