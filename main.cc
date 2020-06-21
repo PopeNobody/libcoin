@@ -143,23 +143,6 @@ string coin::join(const word_list &words)
   return res;
 };
 
-namespace coin {
-  typedef pair<hash_digest,hash_digest> split_dig;
-  split_dig split(const long_digest &dig);
-};
-coin::word_list split(const string &phrase);
-coin::split_dig coin::split(const coin::long_digest &dig)
-{
-  union hash_un {
-    pair<coin::hash_digest,coin::hash_digest> parts;
-    long_digest whole;
-    hash_un(const long_digest &whole)
-      : whole(whole)
-    {
-    };
-  } hash(dig);
-  return hash.parts;
-};
 //   uint32_t coin::to_prefix(uint64_t prefixes)
 //   {
 //     return uint32_t(prefixes>>32);

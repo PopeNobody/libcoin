@@ -327,9 +327,10 @@ namespace coin {
   ostream &operator<<(ostream &lhs, const data_slice &rhs);
   ostream &operator<<(ostream &lhs, const hd_private &rhs);
   ostream &operator<<(ostream &lhs, const hd_root_t &rhs);
-
   long_digest hmac_sha512_hash(const data_slice& data, const data_slice& key);
   word_list split(const string &phrase);
+  typedef pair<hash_digest,hash_digest> split_dig;
+  split_dig split(const long_digest &dig);
 };
 
 #endif

@@ -35,3 +35,16 @@
     };
     return string(buf);
   };
+coin::word_list split(const string &phrase);
+coin::split_dig coin::split(const coin::long_digest &dig)
+{
+  union hash_un {
+    pair<coin::hash_digest,coin::hash_digest> parts;
+    long_digest whole;
+    hash_un(const long_digest &whole)
+      : whole(whole)
+    {
+    };
+  } hash(dig);
+  return hash.parts;
+};
