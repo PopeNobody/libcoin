@@ -53,4 +53,8 @@ Makefile: ; @echo x
 
 .PHONY: all clean install 
 
+full_src:=$(shell find -name '*.hh' -o -name '*.cc')
+tags: $(full_src)
+	ctags $(full_src)
+
 include /dev/null $(wildcard *.d)
