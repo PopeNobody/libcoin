@@ -286,8 +286,38 @@ namespace coin {
       size_t iterations);
 
   string normalize(const string &str);
-  struct stext_t : public array<char,4>
-  {
+  struct stext_t
+  { 
+    array<char,4> data;
+    stext_t(array<char,4> &data)
+      : data(data)
+    {
+    };
+    stext_t(const char *chs)
+    {
+      data[0]=*chs++;
+      data[1]=*chs++;
+    };
+    char *begin() {
+      return data.data();
+    };
+    char *end() {
+      return begin()+2;
+    };
+    char &operator[](int idx) 
+    {
+      return *(begin()+idx);
+    };
+    const char *begin() const {
+      return data.data();
+    };
+    const char *end() const {
+      return begin()+2;
+    };
+    char operator[](int idx) const
+    {
+      return *(begin()+idx);
+    };
   };
   const stext_t &to_hex(unsigned ch);
   inline string encode_base16(const data_slice &slice)

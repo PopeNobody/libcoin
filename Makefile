@@ -10,7 +10,7 @@ MAKEFLAGS := -rR --warn-undefined-variables -j8
 CXX:=$(word 1, $(CXX) clang++ g++)
 CC:=$(CXX)
 RM_F:=rm -f
-LDLIBS:=-lcoin -liberty
+LDLIBS:= -lcoin -liberty
 CPPFLAGS := -Iinclude -I../include -MD
 CXXFLAGS := -ggdb3 -O0 -std=c++17
 LDFLAGS  := -L. -Llib -L../lib
@@ -19,7 +19,7 @@ all_exe := main some_test
 dis_exe := some_test
 exe_exe := $(filter-out $(dis_exe), $(all_exe))
 
-exe_src := $(patsubst %.cc, %, $(all_exe))
+exe_src := $(patsubst %, %.cc, $(all_exe))
 all_src := $(wildcard *.cc)
 lib_src := $(filter-out $(exe_src),$(all_src))
 
@@ -32,7 +32,7 @@ lib_cpp := $(patsubst %.cc, %.cc.i, $(lib_src))
 all_cpp := $(exe_cpp) $(lib_cpp)
 
 
-$(all_obj): %.cc.o: %.cc.i
+$(all_obj): %.cc.o: %.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ -c $<
 
 $(all_cpp): %.cc.i: %.cc
@@ -46,5 +46,11 @@ $(exe_exe): %: %.cc.o libcoin.a etc/ldflags
 
 clean:
 	$(RM_F) $(wildcard *.[ioda]) 
+
+etc/%.mk %.d: ; @echo x
+	
+Makefile: ; @echo x
+
+.PHONY: all clean install 
 
 include /dev/null $(wildcard *.d)

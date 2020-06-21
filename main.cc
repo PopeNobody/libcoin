@@ -333,17 +333,70 @@ coin::hd_root_t coin::hd_root_t::from_seed(const long_digest &seed)
   res.data.root=hd_private(part_hash.first,part_hash.second,lineage);
   return res;
 }
+namespace coin {
+  template<size_t _size>
+  struct bin_and_hex
+  {
+    union {
+      array<byte_t,_size> bytes;
+      uint32_t value;
+    };
+    array<char,_size*2> chars;
+    bin_and_hex(const array<byte_t,_size> & _bytes)
+    {
+      fill(chars.begin(),chars.end(),0);
+      for(int i=0;i<_size;i++)
+      {
+        auto val = _bytes[i];
+        auto text = to_hex(val);
+        chars[2*i+0]=text[0];
+        chars[2*i+1]=text[1];
+        cout.write(chars.begin(),chars.size());
+        cout << endl;
+      };
+    };
+    const char& operator[](unsigned idx) const
+    {
+      return chars[idx];
+    };
+    size_t constexpr size() const {
+      return _size;
+    };
+  };
+  template<size_t _size>
+  ostream &operator<<(ostream &lhs, bin_and_hex<_size> &rhs)
+  {
+    for(auto b(rhs.chars.begin()), e(rhs.chars.end()); b!=e; b++)
+    {
+      lhs << '.' << *b;
+    };
+    return lhs;
+  };
+};
 int app_main(const vector<string> &args)
 {
   int num=0;
   using namespace coin;
-  auto m = hd_root_t::from_mnemonic(mnemonic);
-  auto &root = m.root();
-  auto data=m.root().to_hd_key();
-  auto slice = array_slice(data.data(),data.data()+data.size());
-  cout << encode_base58(slice) << endl;
-  auto purpose=m.root().derive_private(44,true);
-  cout << purpose << endl;
+  union {
+    array<byte_t,4> bytes;
+    unsigned        value;
+  };
+  value=0x1a1b1c1d;
+  cout << hex << value << endl;
+  cout << bin_and_hex <4>(bytes) << endl;
+  bytes[0]=0x00;
+  bytes[1]=0x01;
+  bytes[2]=0x02;
+  bytes[3]=0x03;
+  cout << bin_and_hex<4>(bytes) << endl;
+//     bah.set_bin(bytes);
+//     auto m = hd_root_t::from_mnemonic(mnemonic);
+//     auto &root = m.root();
+//     auto data=m.root().to_hd_key();
+//     auto slice = array_slice(data.data(),data.data()+data.size());
+//     auto purpose=m.root().derive_private(44,true);
+//     cout << "m.root(): " << m.root() << endl;
+//     cout << "purpose: " << purpose << endl;
   return 0;
 }
 
