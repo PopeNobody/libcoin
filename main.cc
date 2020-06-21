@@ -214,12 +214,11 @@ coin::hd_private coin::hd_private::derive_private(int idx, bool hard)const
 
   assert(hard);
   const auto data = coin::splice(depth,secret(),to_big_endian(idx));
+
 //       :
 //       coin::splice(point(), to_big_endian(idx));
 
   const auto parts = split(hmac_sha512_hash(data,chain()));
-  cout << "chain: " << parts.first << endl;
-  cout << "secret: " << parts.second << endl;
   return *this;
 };
 coin::hd_key coin::hd_private::to_hd_key() const
@@ -377,6 +376,7 @@ int app_main(const vector<string> &args)
 {
   int num=0;
   using namespace coin;
+#if 0
   union {
     array<byte_t,4> bytes;
     unsigned        value;
@@ -390,13 +390,15 @@ int app_main(const vector<string> &args)
   bytes[3]=0x03;
   cout << bin_and_hex<4>(bytes) << endl;
 //     bah.set_bin(bytes);
-//     auto m = hd_root_t::from_mnemonic(mnemonic);
-//     auto &root = m.root();
-//     auto data=m.root().to_hd_key();
-//     auto slice = array_slice(data.data(),data.data()+data.size());
-//     auto purpose=m.root().derive_private(44,true);
-//     cout << "m.root(): " << m.root() << endl;
-//     cout << "purpose: " << purpose << endl;
+#endif
+  auto m = hd_root_t::from_mnemonic(mnemonic);
+  auto &root = m.root();
+  auto hd_key=m.root().to_hd_key();
+  auto slice = array_slice(hd_key.data(),hd_key.data()+hd_key.size());
+  auto purpose=m.root().derive_private(44,true);
+  cout << "private_root_key: " << encode_base58(hd_key) << endl;
+  cout << "m.root():         " << m.root() << endl;
+  cout << "purpose:          " << purpose << endl;
   return 0;
 }
 

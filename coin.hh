@@ -320,44 +320,14 @@ namespace coin {
     };
   };
   const stext_t &to_hex(unsigned ch);
-  inline string encode_base16(const data_slice &slice)
-  {
-    char buf[slice.size()*2+2];
-    memset(buf,0,sizeof(buf));
-    auto beg(slice.begin()), end(slice.end());
-    auto dst(buf);
-    while(beg!=end) {
-      auto text=to_hex(*beg++);
-      auto beg(text.begin());
-      while(beg!=text.end() && *beg)
-        *dst++=*beg++;
-      *dst=0;
-    };
-    return string(buf);
-  };
+  string encode_base16(const data_slice &slice);
   size_t count_leading_zeros(const data_slice &rhs);
   size_t count_leading_zeros(const string &rhs);
   void pack_value(data_chunk& indexes, size_t carry);
-  inline ostream &operator<<(ostream &lhs, const data_slice &rhs)
-  {
-    string text=encode_base16(rhs);
-    return lhs << text;
-  };
-  inline ostream &operator<<(ostream &lhs, const hd_private &rhs)
-  {
-    lhs
-      << "hd_private{\n"
-      << "  secret:   " << rhs.secret() << ",\n"
-      << "  chain:    " << rhs.chain() << ",\n"
-      << "  " << rhs.lineage() << "\n"
-      << "}";
-    return lhs;
-  };
-  inline ostream &operator<<(ostream &lhs, const hd_root_t &rhs)
-  {
-    lhs << "hd_root_t(seed=" << rhs.seed() << ", root=" << rhs.root() << ")";
-    return lhs;
-  };
+  ostream &operator<<(ostream &lhs, const data_slice &rhs);
+  ostream &operator<<(ostream &lhs, const hd_private &rhs);
+  ostream &operator<<(ostream &lhs, const hd_root_t &rhs);
+
   long_digest hmac_sha512_hash(const data_slice& data, const data_slice& key);
   word_list split(const string &phrase);
 };
