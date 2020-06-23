@@ -21,6 +21,12 @@ coin::hd_root_t coin::hd_root_t::from_seed(const long_digest &seed)
   auto part_hash=full_hash.parts();
   hd_root_t res;
   res.data.seed=seed;
-  res.data.root=hd_private(part_hash.first,part_hash.second,lineage);
+  res.data.root=hd_private(full_hash.part1(),full_hash.part2(),lineage);
   return res;
 }
+ostream &coin::operator<<(ostream &lhs, const hd_root_t &rhs)
+{
+  lhs << "hd_root_t(\n  seed=" << 
+    rhs.seed() << ",\n  root=" << rhs.root() << "\n)";
+  return lhs;
+};
