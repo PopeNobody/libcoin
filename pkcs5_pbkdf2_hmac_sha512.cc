@@ -1,12 +1,6 @@
 #include "coin.hh"
 #include "hmac_sha512.hh"
 
-//   #include "pkcs5_pbkdf2.h"
-//   
-//   #include <stddef.h>
-//   #include <stdint.h>
-//   #include <stdlib.h>
-//   #include <string.h>
 #include "zeroize.hh"
 using coin::data_slice;
 

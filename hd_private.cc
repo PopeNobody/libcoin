@@ -60,6 +60,7 @@ ostream &coin::operator<<(ostream &lhs, const hd_private &rhs)
 {
   return lhs << "hd_private{" << rhs.to_hd_key() << "}";
 };
+#define xexpose(x) do{ cerr << #x << ": " << x << endl; } while(0)
 coin::hd_private coin::hd_private::derive_private(int idx, bool hard)const
 {
   const static array<byte_t,1> depth = { 0 };
@@ -67,20 +68,25 @@ coin::hd_private coin::hd_private::derive_private(int idx, bool hard)const
 
   if(hard)
     idx+=first_hardened_key;
-
   assert(hard);
   auto data = coin::splice(depth,secret(),to_big_endian(idx));
+  xexpose(data);
 // : coin::splice(point(), to_big_endian(idx));
 
+  xexpose(chain());
   const auto parts = hmac_sha512_hash(data,chain()).parts();
+  xexpose(parts.first);
+  xexpose(parts.second);
 
-  auto child=secret();
+  auto child = secret();
+  xexpose(child);
   if(!do_ec_add(child,parts.first))
     throw runtime_error("failed to add child and secret");
 
+#if 0
   if(lineage().depth() == 255)
     throw runtime_error("depth > 255 not allowed!");
-
+#endif
   return *this;
 };
 coin::hd_key coin::hd_private::to_hd_key() const

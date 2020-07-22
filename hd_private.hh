@@ -5,12 +5,14 @@
 #include "hd_key.hh"
 
 namespace coin {
+  static size_t constexpr first_hardened_key=(1<<31);
   struct hd_private {
     struct data_t {
       hash_digest secret;
       hash_digest chain;
       hd_lineage_t lineage;
-      data_t(const hash_digest &secret, const hash_digest &chain, const hd_lineage_t &lineage)
+      data_t(const hash_digest &secret, 
+          const hash_digest &chain, const hd_lineage_t &lineage)
         : secret(secret), chain(chain), lineage(lineage)
       {
       };
@@ -28,7 +30,8 @@ namespace coin {
     hd_private()
     {
     };
-    hd_private(const hash_digest &secret, const hash_digest &chain, const hd_lineage_t &lineage)
+    hd_private(const hash_digest &secret,
+        const hash_digest &chain, const hd_lineage_t &lineage)
       : data(secret,chain,lineage)
     {
     };
@@ -49,5 +52,6 @@ namespace coin {
     };
     hd_key to_hd_key() const;
   };
+  ostream &operator<<(ostream &lhs, const hd_private &rhs);
 }
 #endif

@@ -10,7 +10,7 @@ MAKEFLAGS := -rR --warn-undefined-variables -j8
 CXX:=$(word 1, $(CXX) clang++ g++)
 CC:=$(CXX)
 RM_F:=rm -f
-LDLIBS:= -lcoin -liberty
+LDLIBS:= -lcoin -liberty -lsecp256k1 -lgmp
 CPPFLAGS := -Iinclude -I../include -MD
 CXXFLAGS := -ggdb3 -O0 -std=c++17
 LDFLAGS  := -L. -Llib -L../lib

@@ -6,7 +6,6 @@
 
 namespace coin {
   typedef uint8_t byte_t;
-#define constexpr constexpr
 
 // Common bitcoin hash container sizes.
 static constexpr size_t hash_size = 32;
@@ -16,60 +15,65 @@ static constexpr size_t long_hash_size = 2 * hash_size;
 static constexpr size_t short_hash_size = 20;
 static constexpr size_t mini_hash_size = 6;
 
-template<size_t size>
-  class byte_array : public std::array<byte_t, size>
-{
-};
 
+template<size_t size>
+  struct byte_array : public array<byte_t,size>
+  {
+  };
 // Common bitcoin hash containers.
-typedef byte_array<hash_size> hash_digest;
+
 typedef byte_array<half_hash_size> half_hash;
 typedef byte_array<quarter_hash_size> quarter_hash;
-typedef byte_array<hash_size> long_hash;
+typedef byte_array<long_hash_size> long_hash;
+typedef byte_array<hash_size> hash_digest;
 typedef array_slice<byte_t> data_slice;
 typedef array_slice<char> text_slice;
 
 struct long_digest
 {
-  typedef byte_array<long_hash_size> data_t;
-  typedef pair<hash_digest,hash_digest> split_t;
+  typedef long_hash whole_t;
+  typedef hash_digest part_t;
+  typedef pair<part_t,part_t> split_t;
   union {
-    data_t data;
+    whole_t whole;
     split_t split;
   };
-  long_digest(const data_t &data = data_t())
-    : data(data)
+  long_digest(const whole_t &whole = whole_t())
+    : whole(whole)
   {
   };
   long_digest &operator=(const long_digest &rhs)
   {
-    data=rhs.data;
+    whole=rhs.whole;
     return *this;
   };
   operator const data_slice() const
   {
-    return data_slice(data);
+    return data_slice(whole);
   };
   uint8_t *begin() {
-    return data.begin();
+    return whole.begin();
   };
   uint8_t *end() {
-    return data.end();
+    return whole.end();
+  };
+  uint8_t *data() {
+    return whole.data();
   };
   const uint8_t *begin() const {
-    return data.begin();
+    return whole.begin();
   };
   const uint8_t *end() const {
-    return data.end();
+    return whole.end();
   };
   const size_t size() const {
-    return data.size();
+    return whole.size();
   };
-  const hash_digest &part1() const
+  const part_t &part1() const
   {
     return split.first;
   };
-  const hash_digest &part2() const
+  const part_t &part2() const
   {
     return split.second;
   };
@@ -78,7 +82,16 @@ struct long_digest
     return split;
   };
 };
-ostream &operator<<(ostream &lhs, const long_digest &rhs);
+ostream &operator<<(ostream &lhs, const data_slice &rhs);
+inline ostream &operator<<(ostream &lhs, const long_digest &rhs)
+{
+  return lhs << data_slice(rhs);
+};
+inline ostream &operator<<(ostream &lhs, const hash_digest &rhs)
+{
+  return lhs << data_slice(rhs);
+};
+
 typedef byte_array<short_hash_size> short_hash;
 typedef byte_array<mini_hash_size> mini_hash;
 
@@ -94,108 +107,6 @@ typedef std::vector<mini_hash> mini_hash_list;
 typedef boost::multiprecision::uint128_t uint128_t;
 typedef boost::multiprecision::uint256_t uint256_t;
 
-//   // Null-valued common bitcoin hashes.
-//   
-//   constexpr hash_digest null_hash
-//   {
-//       {
-//           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-//       }
-//   };
-//   
-//   constexpr half_hash null_half_hash
-//   {
-//       {
-//           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-//       }
-//   };
-//   
-//   constexpr quarter_hash null_quarter_hash
-//   {
-//       {
-//           0, 0, 0, 0, 0, 0, 0, 0
-//       }
-//   };
-//   
-//   constexpr long_hash null_long_hash
-//   {
-//       {
-//           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-//       }
-//   };
-//   
-//   constexpr short_hash null_short_hash
-//   {
-//       {
-//           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//           0, 0, 0, 0
-//       }
-//   };
-//   
-//   constexpr mini_hash null_mini_hash
-//   {
-//       {
-//           0, 0, 0, 0, 0, 0
-//       }
-//   };
-//   
-//   inline uint256_t to_uint256(const hash_digest& hash)
-//   {
-//       return from_little_endian<uint256_t>(hash.begin(), hash.end());
-//   }
-//   
-//   /// Generate a scrypt hash to fill a byte array.
-//   template <size_t Size>
-//   byte_array<Size> scrypt(const data_slice& data, const data_slice& salt, uint64_t N,
-//       uint32_t p, uint32_t r);
-//   
-//   /// Generate a scrypt hash of specified length.
-//   BC_API data_chunk scrypt(const data_slice& data, const data_slice& salt, uint64_t N,
-//       uint32_t p, uint32_t r, size_t length);
-//   
-//   /// Generate a bitcoin hash.
-//   BC_API hash_digest bitcoin_hash(const data_slice& data);
-//   
-//   /// Generate a scrypt hash.
-//   BC_API hash_digest scrypt_hash(const data_slice& data);
-//   
-//   /// Generate a bitcoin short hash.
-//   BC_API short_hash bitcoin_short_hash(const data_slice& data);
-//   
-//   /// Generate a ripemd160 hash
-//   BC_API short_hash ripemd160_hash(const data_slice& data);
-//   BC_API data_chunk ripemd160_hash_chunk(const data_slice& data);
-//   
-//   /// Generate a sha1 hash.
-//   BC_API short_hash sha1_hash(const data_slice& data);
-//   BC_API data_chunk sha1_hash_chunk(const data_slice& data);
-//   
-//   /// Generate a sha256 hash.
-//   BC_API hash_digest sha256_hash(const data_slice& data);
-//   BC_API data_chunk sha256_hash_chunk(const data_slice& data);
-//   
-//   /// Generate a sha256 hash.
-//   /// This hash function was used in electrum seed stretching (obsoleted).
-//   BC_API hash_digest sha256_hash(const data_slice& first, const data_slice& second);
-//   
-//   // Generate a hmac sha256 hash.
-//   BC_API hash_digest hmac_sha256_hash(const data_slice& data, const data_slice& key);
-//   
-//   /// Generate a sha512 hash.
-//   BC_API long_hash sha512_hash(const data_slice& data);
-//   
-//   /// Generate a hmac sha512 hash.
-//   BC_API long_hash hmac_sha512_hash(const data_slice& data, const data_slice& key);
-//   
-//   /// Generate a pkcs5 pbkdf2 hmac sha512 hash.
-//   BC_API long_hash pkcs5_pbkdf2_hmac_sha512(const data_slice& passphrase,
-//       const data_slice& salt, size_t iterations);
-//   
-//   } // namespace system
 } // namespace libbitcoin
 
 // Extend std and boost namespaces with our hash wrappers.

@@ -18,7 +18,10 @@ namespace coin {
     hd_lineage_t()
     {
     };
-    hd_lineage_t(const prefix_t &prefix, uint8_t depth, uint32_t parent_fp, uint32_t child_no)
+    hd_lineage_t(
+        const prefix_t &prefix, uint8_t depth, 
+        uint32_t parent_fp, uint32_t child_no
+        )
       : data( { prefix, depth, parent_fp, child_no } )
     {
     };

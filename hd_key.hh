@@ -12,5 +12,6 @@ namespace coin
     {
     };
   };
+  ostream &operator<<(ostream &lhs, const hd_key &rhs);
 }
 #endif

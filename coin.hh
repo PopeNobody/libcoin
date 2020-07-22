@@ -51,11 +51,46 @@ namespace coin {
       };
       return res;
     };
+  template <size_t Left, size_t Right>
+    byte_array<Left + Right> splice(const std::array<uint8_t, Left>& left,
+        const std::array<uint8_t, Right>& right)
+    {
+      byte_array<Left+Right> res;
+      auto dst(res.begin());
+      dst=std::copy(left.begin(),left.end(),dst);
+      dst=std::copy(right.begin(),right.end(),dst);
+      return res;
+    };
 
-  inline ostream &operator<<(ostream &lhs, const hd_key &rhs)
-  {
-    return lhs << encode_base58(rhs);
-  };
+  template <size_t Left, size_t Middle, size_t Right>
+    byte_array<Left + Middle + Right> splice(const std::array<uint8_t, Left>& left,
+        const std::array<uint8_t, Middle>& middle,
+        const std::array<uint8_t, Right>& right)
+    {
+      byte_array<Left+Middle+Right> res;
+      std::fill(res.begin(),res.end(),0);
+      auto dst(res.begin());
+      dst=std::copy(left.begin(),left.end(),dst);
+      dst=std::copy(middle.begin(),middle.end(),dst);
+      dst=std::copy(right.begin(),right.end(),dst);
+      return res;
+    };
+
+  template<typename int_t, typename itr_t>
+    int_t from_little_endian_unsafe(itr_t start)
+    {
+      using std::cout;
+      using std::endl;
+      static_assert(std::is_unsigned<int_t>::value, "Unsigned only, please!");
+      int_t out=0;
+      int i=0;
+      while(i<sizeof(int_t)) {
+        auto xxx = static_cast<int_t>(0xff&*start++);
+        xxx <<= (8*i++);
+        out |= xxx;
+      };
+      return out;
+    };
   uint64_t to_prefixes(uint32_t pri_pfix, uint32_t pub_pfix);
   template <typename int_t>
     byte_array<sizeof(int_t)> to_big_endian(int_t val);

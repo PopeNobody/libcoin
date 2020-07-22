@@ -4,31 +4,6 @@
 #include "coin.hh"
 
 
-namespace coin {
-  template <size_t Left, size_t Right>
-    byte_array<Left + Right> splice(const std::array<uint8_t, Left>& left,
-        const std::array<uint8_t, Right>& right)
-    {
-      byte_array<Left+Right> res;
-      auto dst(res.begin());
-      dst=std::copy(left.begin(),left.end(),dst);
-      dst=std::copy(right.begin(),right.end(),dst);
-      return res;
-    };
-
-  template <size_t Left, size_t Middle, size_t Right>
-    byte_array<Left + Middle + Right> splice(const std::array<uint8_t, Left>& left,
-        const std::array<uint8_t, Middle>& middle,
-        const std::array<uint8_t, Right>& right)
-    {
-      byte_array<Left+Middle+Right> res;
-      auto dst(res.begin());
-      std::copy(left.begin(),left.end(),dst);
-      std::copy(middle.begin(),middle.end(),dst);
-      std::copy(right.begin(),right.end(),dst);
-      return res;
-    };
-}
 #define xexpose(x) do{ \
   using namespace std; \
   ostringstream str; \
@@ -168,217 +143,53 @@ coin::hash_digest coin::bitcoin_hash(const data_slice &data)
 {
   return sha256_hash(sha256_hash(data));
 };
-template<typename int_t, typename itr_t>
-int_t from_little_endian_unsafe(itr_t start)
-{
-  using std::cout;
-  using std::endl;
-  static_assert(std::is_unsigned<int_t>::value, "Unsigned only, please!");
-  int_t out=0;
-  int i=0;
-  while(i<sizeof(int_t)) {
-    auto xxx = static_cast<int_t>(0xff&*start++);
-    xxx <<= (8*i++);
-    out |= xxx;
-  };
-  return out;
-};
 uint32_t coin::bitcoin_checksum(const data_slice &data)
 {
   const auto hash = bitcoin_hash(data);
   return from_little_endian_unsafe<uint32_t>(hash.begin());
 };
-coin::hd_private coin::hd_private::derive_private(int idx, bool hard)const
+vector<string> tests = {
+"408b285c123836004f4b8842c89324c1f01382450c0d439af345ba7fc49acf705489c6fc77dbd4e3dc1dd8cc6bc9f043db8ada1e243c4a0eafb290d399480840",
+"hd_private{hd_key{xprv9s21ZrQH143K4VHfAaPWRTm4aoHAZhJHunsZZTQptR82FSTZRjBGXBP8kQKHrUVUE8vMM2Z3h7UoG9x9XCt9FHQ1t1nHU7zQDqrEszAg28q}}",
+"hd_private{hd_key{xprv9uX3hyBN8aRi2t9JHqRSd4BksMdj5ZnyaFbWfs3vd94yBAE1ZFkLiA7HR1tBDVQcS6SAQTzzXFjqj5w4beUDnELGENUHKEGX6o1qRCAkYQk}}"
+};
+
+#define throw_runtime_error(x) do{ \
+  ostringstream msg; \
+  msg << x; \
+  throw runtime_error(msg.str()); \
+}while(0);
+template<typename res_t>
+void check_result(int step, const res_t &rhs)
 {
-  static constexpr auto first=(1<<31);
-  if(hard)
-    idx+=first;
-  const static array<byte_t,1> depth = { 0 };
-
-  assert(hard);
-  const auto data = coin::splice(depth,secret(),to_big_endian(idx));
-
-//       :
-//       coin::splice(point(), to_big_endian(idx));
-
-  const auto parts = hmac_sha512_hash(data,chain()).parts();
-  return *this;
-};
-coin::hd_key coin::hd_private::to_hd_key() const
-{
-  data_chunk hd_key;
-  size_t ls=hd_key.size();
-  for( auto ch : to_big_endian(lineage().prefix().part1()) )
-    hd_key.push_back(ch);
-  hd_key.push_back(lineage().depth());
-  for( auto ch : to_big_endian(lineage().parent_fp()) )
-    hd_key.push_back(ch);
-  for( auto ch : to_big_endian(lineage().child_no()) )
-    hd_key.push_back(ch);
-  for( auto ch : chain() )
-    hd_key.push_back(ch);
-  hd_key.push_back(0);
-  for( auto ch : secret() )
-    hd_key.push_back(ch);
-  auto sha256_1 = sha256_hash(hd_key);
-  auto sha256_2 = sha256_hash(sha256_1);
-  auto checksum = from_little_endian_unsafe<uint32_t>(sha256_2.begin());
-  auto form = to_little_endian(checksum);
-  for( auto ch : form )
-    hd_key.push_back(ch);
-  return hd_key;
-};
-template<typename int_t>
-coin::byte_array<sizeof(int_t)>  to_little_endian(int_t val)
-{
-  coin::byte_array<sizeof(int_t)> res;
-  for(int i=0;i<res.size();i++)
-  {
-    res[res.size()-1-i]=val&0xff;
-    val >>= 8;
-  };
-  return res;
-};
-#if 0
-namespace coin {
-  data_chunk hd_priv_derive(const data_chunk &in, int idx, bool hard);
-};
-
-data_chunk coin::hd_priv_derive(const coin::data_chunk &in, int idx, bool hard)
-{
-  static constexpr auto first=(1<<31);
-  if(hard)
-    idx+=first;
-  const static array<char,1> depth = { 0 };
-
-#if 0
-  const auto data = hard ?
-    splice(depth,secret_,to_big_endian(idx))
-    :
-    splice(point_, to_big_endian(index));
-
-  const auto parts = split(hmac_sha512_hash(data,chain_));
-  cout << "chain: " << parts.first << endl;
-  cout << "secret: " << parts.second << endl;
-#endif
-//     auto child=secret_;
-//     if(!ec_add(child,parts.first))
-//       return {};
-//   
-//     if(lineage_.depth == max_uint8)
-//       return {};
-//   
-//     uint32_t;
-};
-coin::hd_root_t coin::hd_new(const coin::long_digest &seed)
-{
-
-
-  static const auto magic = to_chunk("Bitcoin seed");
-
-  const auto intermediate = split(hmac_sha512_hash(seed,magic));
-  int kid_num=0;
-  int depth=0;
-  int parent_fingerprint=0;
-  auto hash_code = hmac_sha512_hash(seed,magic);
-  auto inter = split(hash_code);
-  hash_digest secret = inter.first;
-  hash_digest chain = inter.second;
-  hd_lineage_t &lineage(lineage);
-
-  hd_private root_key(secret, chain, lineage);
-
-
-  return data;
-};
-#endif
-#if 0
-namespace coin {
-  template<size_t _size>
-  struct bin_and_hex
-  {
-    union {
-      array<byte_t,_size> bytes;
-      uint32_t value;
-    };
-    array<char,_size*2> chars;
-    bin_and_hex(const array<byte_t,_size> & _bytes)
-    {
-      fill(chars.begin(),chars.end(),0);
-      for(int i=0;i<_size;i++)
-      {
-        auto val = _bytes[i];
-        auto text = to_hex(val);
-        chars[2*i+0]=text[0];
-        chars[2*i+1]=text[1];
-        cout.write(chars.begin(),chars.size());
-        cout << endl;
-      };
-    };
-    const char& operator[](unsigned idx) const
-    {
-      return chars[idx];
-    };
-    size_t constexpr size() const {
-      return _size;
-    };
-  };
-  template<size_t _size>
-  ostream &operator<<(ostream &lhs, bin_and_hex<_size> &rhs)
-  {
-    for(auto b(rhs.chars.begin()), e(rhs.chars.end()); b!=e; b++)
-    {
-      lhs << '.' << *b;
-    };
-    return lhs;
-  };
-};
-#endif
+  ostringstream res;
+  res << rhs;
+  if(step >= tests.size() )
+    throw_runtime_error("no test for step " << step);
+  if( res.str() == tests[step] )
+    return;
+  throw_runtime_error( 
+      "failed."<< 
+      "  step:     " << step << endl <<
+      "  expected: " << tests[step] << endl <<
+      "  got:      " << res.str() << endl <<
+      "sorry."
+      );
+}
 int app_main(const vector<string> &args)
 {
   int num=0;
   using namespace coin;
-#if 0
-  union {
-    array<byte_t,4> bytes;
-    unsigned        value;
-  };
-  value=0x1a1b1c1d;
-  cout << hex << value << endl;
-  cout << bin_and_hex <4>(bytes) << endl;
-  bytes[0]=0x00;
-  bytes[1]=0x01;
-  bytes[2]=0x02;
-  bytes[3]=0x03;
-  cout << bin_and_hex<4>(bytes) << endl;
-//     bah.set_bin(bytes);
-#endif
   auto m = hd_root_t::from_mnemonic(mnemonic);
   auto &root = m.root();
-  auto hd_key=m.root().to_hd_key();
-  auto slice = array_slice(hd_key.data(),hd_key.data()+hd_key.size());
+  check_result(0, m.seed());
+  check_result(1, m.root());
+  cout << m << endl;
   auto purpose=m.root().derive_private(44,true);
-  cout << "root_key:         " << encode_base58(hd_key) << endl;
   cout << "m.root():         " << m.root() << endl;
   cout << "purpose:          " << purpose << endl;
   return 0;
 }
-
-#if 0
-ostream &coin::operator<<(ostream &lhs, const coin::long_digest &rhs)
-{
-  char buf[sizeof(rhs)*2+2];
-  char *pos=buf;
-  for(auto ch : rhs)
-  {
-    const char *hex=to_hex(ch);
-    *pos++=*hex++;
-    *pos++=*hex++;
-  };
-  *pos++=0;
-  return lhs<<buf;
-};
-#endif
 
 int main(int argc, char**argv)
 {

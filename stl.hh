@@ -39,6 +39,7 @@ using std::setprecision;
 using std::ostringstream;
 using boost::core::demangle;
 
+
 namespace coin {
   typedef vector<string> word_list;
   typedef uint8_t byte_t;
@@ -46,7 +47,6 @@ namespace coin {
   typedef vector<char> text_chunk;
   word_list split_words(const string &phrase);
 };
-
 namespace std {
   inline ostream &operator<<(ostream &lhs, const type_info &rhs)
   {

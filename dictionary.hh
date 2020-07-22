@@ -37,7 +37,7 @@ namespace coin {
     lhs << rhs.text();
     return lhs;
   };
-  enum { dictionary_size=2048 };
+  constexpr dictionary_size = 2048;
   class dictionary_t : public std::array<const char*, dictionary_size>
   {
   };
